@@ -1,5 +1,6 @@
 //Imports
 const express = require('express');
+const { isNull } = require('util');
 const app = express();
 app.use(express.json());
 
@@ -341,6 +342,49 @@ app.delete('/servicos/:codigo', (req, res) => {
 //Porta do servidor
 app.listen('3000', () => {
     console.log('Servidor rodando na porta 3000');
+});
+
+//Agendamentos
+let agendamentos = [];
+let idAgendamentos = 1;
+
+app.get('/agendamentos', (req, res) => {
+    res.status(200).json(agendamentos);
+});
+
+app.post('/agendamentos', (req, res) => {
+    const id = idAgendamentos;
+    const id_carroAgendamento = req.body.id_carro;
+    const id_servicoAgendamento = req.body.id_servico;
+    const data_horaAgendamento = req.body.data_hora;
+
+    const indexCarro = carros.findIndex(c => c.id == id_carroAgendamento);
+    const indexServico = servicos.findIndex(s => s.id == id_servicoAgendamento);
+
+    if(indexCarro == -1){
+        res.status(404).json({message: "id_carro não corresponde a um carro cadastrado"});
+        return;
+    }
+    if(indexServico == -1){
+        res.status(404).json({message: "id_servico não corresponde a um serviço cadastrado"});
+        return;
+    }
+
+    if(isNull(data_horaAgendamento)){
+        res.status(400).json({message: "'data_hora' deve ser informado"});
+        return;
+    }
+
+    const novoAgendamento = {
+        id: id,
+        id_carro: id_carroAgendamento,
+        id_servico: id_servicoAgendamento,
+        data_hora: data_horaAgendamento
+    }
+
+    agendamentos.push(novoAgendamento);
+    res.status(201).json({message: "Agendamento cadastrado com sucesso"});
+
 });
 
 //Exports
