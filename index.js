@@ -240,6 +240,104 @@ app.delete('/carros/:codigo', (req, res) => {
     res.status(200).json({message: "Carro removido com sucesso"});
 });
 
+//Servicos
+let servicos = [];
+let idServicos = 1;
+
+app.get('/servicos', (req, res) => {
+    res.status(200).json(servicos);
+});
+
+app.post('/servicos', (req, res) => {
+    const id = idServicos;
+    const descricaoServico = req.body.descricao;
+    const valoresServico = req.body.valores;
+    const indexValorZero = valoresServico.findIndex(v => v.valor <= 0);
+
+    //Validações
+    if(descricaoServico.length < 5){
+        res.status(400).json({message: "descricao deve conter no mínimo 5 caracteres"});
+        return;
+    }
+    else if(descricaoServico.length > 100){
+        res.status(400).json({message: "descricao deve conter no máximo 100 caracteres"});
+        return;
+    }
+
+    if(indexValorZero != -1){
+        res.status(400).json({message: `O valor para ${valoresServico[indexValorZero].tamanho} deve ser igual ou maior que 0`});
+        return;
+    }
+
+    const novoServico = {
+        id: id,
+        descricao: descricaoServico,
+        valores: valoresServico
+    }
+
+    servicos.push(novoServico);
+    idServicos++;
+    res.status(201).json({message: "Servico cadastrado com sucesso"});
+});
+
+app.get('/servicos/:codigo', (req, res) => {
+    const index = servicos.findIndex(s => s.id == req.params.codigo);
+
+    //Validação
+    if(index == -1){
+        res.status(404).json({message: "Servico não encontrado"});
+        return;
+    }
+
+    res.status(200).json(servicos[index]);
+});
+
+app.put('/servicos/:codigo', (req, res) => {
+    const servico = req.body;
+    const index = servicos.findIndex(s => s.id == servico.id);
+    const indexValorZero = servico.valores.findIndex(v => v.valor <= 0);
+
+    //Validações
+    if(servico.id <= 0){
+        res.status(400).json({message: "Codigo deve ser maior que 0"});
+        return;
+    }
+    else if(index == -1){
+        res.status(404).json({message: "Servico não encontrado"});
+        return;
+    }
+
+    if(servico.descricao.length < 5){
+        res.status(400).json({message: "descricao deve conter no mínimo 5 caracteres"});
+        return;
+    }
+    else if(servico.descricao.length > 100){
+        res.status(400).json({message: "descricao deve conter no máximo 100 caracteres"});
+        return;
+    }
+
+    if(indexValorZero != -1){
+        res.status(400).json({message: `O valor para ${servico.valores[indexValorZero].tamanho} deve ser igual ou maior que 0`});
+        return;
+    }
+
+    servicos[index] = servico;
+    res.status(201).json({message: "Servico atualizado com sucesso"});
+});
+
+app.delete('/servicos/:codigo', (req, res) => {
+    const index = servicos.findIndex(s => s.id == req.params.codigo);
+
+    //Validação
+    if(index == -1){
+        res.status(404).json({message: "Servico não encontrado"});
+        return;
+    }
+
+    servicos.splice(index, 1);
+    res.status(200).json({message: "Servico removido com sucesso"});
+});
+
 //Porta do servidor
 app.listen('3000', () => {
     console.log('Servidor rodando na porta 3000');
